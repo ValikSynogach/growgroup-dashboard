@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Grow Groups · SOL Church</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+/* =========================================================
+   CONFIG — edit these two values for your deployment.
+   ========================================================= */
+</style>
+<script>
+  // === EDIT THESE TWO VALUES ===
+  const CONFIG = {
+    // 1. The published CSV URL of your "Reports" tab.
+    //    In Google Sheets: File → Share → Publish to web → Sheet: "Reports", Format: CSV → Publish.
+    //    Paste the resulting URL here. Leave blank to use demo data.
+    SHEET_CSV_URL: "",
+
+    // 2. Dashboard password. Change this; everyone with the link must enter it.
+    //    (Client-side only — a courtesy gate, not enterprise security.)
+    PASSWORD: "growgroup2026",
+
+    // Cosmetic
+    CHURCH_NAME: "SOL Church",
+    DASHBOARD_TITLE: "Grow Groups",
+  };
+</script>
+
+<style>
+/* ---------- design tokens ---------- */
+:root {
+  --bg: #F5EEDD;
+  --bg-soft: #FBF5E7;
+  --card: #FFFFFF;
+  --card-warm: #FDFAF1;
+  --ink: #2D1F12;
+  --ink-soft: #6B5840;
+  --ink-mute: #9C8769;
+  --line: #E4D8BD;
+  --line-soft: #EFE7D2;
+  --terracotta: #C16545;
+  --terracotta-dark: #9A4D33;
+  --terracotta-soft: #F2D9CC;
+  --gold: #C8964A;
+  --sage: #7E8F62;
+  --sage-soft: #DDE4CB;
+  --rose: #B97A6E;
+  --rose-soft: #EED7D1;
+  --shadow: 0 1px 2px rgba(74, 51, 30, 0.04), 0 8px 24px rgba(74, 51, 30, 0.06);
+  --radius: 14px;
+  --radius-lg: 22px;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'Manrope', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+/* warm paper texture via layered radial gradients */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(900px 600px at 8% 10%, rgba(193, 101, 69, 0.04), transparent 60%),
+    radial-gradient(700px 500px at 92% 92%, rgba(200, 150, 74, 0.05), transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+.app { position: relative; z-index: 1; }
+
+a { color: var(--terracotta-dark); }
+button { font-family: inherit; }
+
+/* ========== password gate ========== */
+.gate {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem;
+  z-index: 100;
+}
+.gate-card {
+  width: 100%; max-width: 380px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 2rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.gate-mark {
+  font-family: var(--serif);
+  font-size: 2.5rem;
+  color: var(--terracotta);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.gate-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.75rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.25rem;
+  font-variation-settings: "opsz" 144;
+}
+.gate-sub {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  margin: 0 0 1.75rem;
+}
+.gate input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font: 500 0.95rem/1 var(--sans);
+  color: var(--ink);
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .15s, background .15s;
+}
+.gate input:focus { border-color: var(--terracotta); background: var(--card); }
+.gate-btn {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  font: 600 0.95rem/1 var(--sans);
+  color: var(--card);
+  background: var(--terracotta);
+  border: 0; border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.gate-btn:hover { background: var(--terracotta-dark); }
+.gate-error {
+  margin-top: 0.75rem; height: 1.2em;
+  color: var(--rose); font-size: 0.85rem;
+}
+
+/* ========== header ========== */
+.shell { max-width: 1180px; margin: 0 auto; padding: 3.5rem 2rem 5rem; }
+
+.header { margin-bottom: 3.5rem; }
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 0.85rem;
+}
+.title {
+  font-family: var(--serif);
+  font-variation-settings: "opsz" 144;
+  font-weight: 400;
+  font-size: clamp(2.4rem, 5.5vw, 3.6rem);
+  letter-spacing: -0.025em;
+  line-height: 1;
+  margin: 0 0 1.25rem;
+}
+.title em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--terracotta);
+}
+.divider {
+  display: flex; align-items: center; gap: 1rem;
+  color: var(--ink-mute);
+  margin: 1.5rem 0 2rem;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--line);
+}
+.divider .glyph { font-family: var(--serif); font-size: 1.1rem; color: var(--gold); }
+
+.controls {
+  display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;
+}
+.select-wrap {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  display: inline-flex; align-items: center; gap: 0.75rem;
+}
+.select-wrap label {
+  font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.select-wrap select {
+  appearance: none; -webkit-appearance: none;
+  background: transparent; border: 0;
+  font: 500 0.92rem/1 var(--sans);
+  color: var(--ink);
+  padding: 0.35rem 1.75rem 0.35rem 0.25rem;
+  cursor: pointer;
+  outline: none;
+}
+.select-wrap::after {
+  content: '⌄'; position: absolute; right: 1rem; top: 50%;
+  transform: translateY(-65%); color: var(--ink-mute); font-size: 1rem; pointer-events: none;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.7rem 1.1rem;
+  font: 500 0.85rem/1 var(--sans);
+  color: var(--ink-soft);
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  transition: border-color .15s, color .15s;
+}
+.btn-ghost:hover { border-color: var(--terracotta); color: var(--terracotta-dark); }
+.btn-ghost svg { width: 14px; height: 14px; }
+
+/* demo banner */
+.banner {
+  background: linear-gradient(180deg, var(--card-warm), var(--card-warm));
+  border: 1px dashed var(--gold);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.2rem;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  margin-bottom: 2rem;
+  display: flex; gap: 0.85rem; align-items: flex-start;
+}
+.banner b { color: var(--ink); font-weight: 600; }
+
+/* ========== stats grid ========== */
+.section-label {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+  margin: 0 0 1rem;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+.stat {
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.5rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.stat::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 3px; background: var(--accent, var(--terracotta));
+  opacity: 0.85;
+}
+.stat-label {
+  font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-mute); margin-bottom: 0.5rem;
+}
+.stat-value {
+  font-family: var(--serif);
+  font-variation-settings: "opsz" 144;
+  font-weight: 400;
+  font-size: 2.6rem;
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+}
+.stat-meta { font-size: 0.82rem; color: var(--ink-soft); }
+.stat--terracotta { --accent: var(--terracotta); }
+.stat--sage { --accent: var(--sage); }
+.stat--rose { --accent: var(--rose); }
+.stat--gold { --accent: var(--gold); }
+
+/* ========== chart row ========== */
+.row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 3.5rem;
+}
+@media (max-width: 820px) {
+  .row { grid-template-columns: 1fr; }
+}
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+}
+.panel h3 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.35rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.35rem;
+}
+.panel .panel-sub {
+  font-size: 0.85rem;
+  color: var(--ink-mute);
+  margin: 0 0 1.5rem;
+}
+.chart-wrap { position: relative; width: 100%; height: 280px; }
+.legend { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; font-size: 0.85rem; color: var(--ink-soft); }
+.legend .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; margin-right: 0.4rem; vertical-align: middle; }
+
+/* ========== prayer requests ========== */
+.prayers { margin-bottom: 3rem; }
+.prayers-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.prayers-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.prayers-title em { font-style: italic; color: var(--terracotta); font-weight: 300; }
+.prayers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+.prayer {
+  background: var(--card-warm);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.5rem 1.5rem;
+  position: relative;
+}
+.prayer::before {
+  content: '"';
+  font-family: var(--serif);
+  font-size: 3.5rem;
+  color: var(--terracotta-soft);
+  position: absolute; top: 0.3rem; left: 1rem;
+  line-height: 1;
+}
+.prayer-text {
+  position: relative;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: var(--ink);
+  margin: 0.6rem 0 1.1rem;
+  font-variation-settings: "opsz" 60;
+}
+.prayer-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.78rem; color: var(--ink-mute);
+  letter-spacing: 0.04em;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 0.85rem;
+}
+.prayer-meta b { color: var(--ink-soft); font-weight: 600; }
+
+/* ========== not reported ========== */
+.missing {
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 2rem;
+}
+.missing h3 {
+  font-family: var(--serif); font-weight: 400; font-size: 1.35rem;
+  margin: 0 0 0.25rem;
+}
+.missing-sub { color: var(--ink-mute); font-size: 0.88rem; margin: 0 0 1.25rem; }
+.missing ul { list-style: none; padding: 0; margin: 0; }
+.missing li {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 0.95rem;
+}
+.missing li:last-child { border-bottom: 0; }
+.missing-name { font-weight: 500; }
+.missing-group { color: var(--ink-mute); font-size: 0.85rem; font-style: italic; }
+
+.empty {
+  text-align: center; padding: 3rem 1rem;
+  color: var(--ink-mute);
+}
+.empty-mark { font-family: var(--serif); font-size: 2.5rem; color: var(--gold); margin-bottom: 0.5rem; }
+
+/* ========== footer ========== */
+.footer {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.live-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--sage);
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.25); }
+}
+
+/* ========== loading skeleton fade-in ========== */
+[data-pane] { opacity: 0; transform: translateY(6px); transition: opacity .6s ease, transform .6s ease; }
+[data-pane].ready { opacity: 1; transform: none; }
+[data-pane="stats"]   { transition-delay: .05s; }
+[data-pane="row"]     { transition-delay: .15s; }
+[data-pane="prayers"] { transition-delay: .25s; }
+[data-pane="missing"] { transition-delay: .35s; }
+
+/* hide app until unlocked */
+.app.locked { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ============ password gate ============ -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-mark">✦</div>
+    <h1 class="gate-title">Welcome 🙏</h1>
+    <p class="gate-sub">Grow Groups · weekly reports</p>
+    <input id="pwd" type="password" placeholder="Enter password" autocomplete="off" />
+    <button class="gate-btn" id="enter">Enter</button>
+    <div class="gate-error" id="err"></div>
+  </div>
+</div>
+
+<!-- ============ dashboard ============ -->
+<div class="app locked" id="app">
+  <div class="shell">
+
+    <!-- header -->
+    <header class="header">
+      <div class="eyebrow" id="church-name">SOL Church</div>
+      <h1 class="title" id="title">Grow <em>Groups</em></h1>
+      <div class="divider"><span class="glyph">❦</span></div>
+      <div class="controls">
+        <div class="select-wrap">
+          <label for="week">Week</label>
+          <select id="week"></select>
+        </div>
+        <button class="btn-ghost" id="refresh" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          Refresh
+        </button>
+      </div>
+    </header>
+
+    <!-- demo banner (shown only when no CSV configured) -->
+    <div class="banner" id="banner" style="display:none">
+      <span>🌱</span>
+      <div><b>Demo mode.</b> Showing sample data. Edit <code>CONFIG.SHEET_CSV_URL</code> in the file to connect your real Google Sheet.</div>
+    </div>
+
+    <!-- stats -->
+    <p class="section-label">An overview</p>
+    <div class="stats" data-pane="stats">
+      <div class="stat stat--terracotta">
+        <div class="stat-label">Total leaders</div>
+        <div class="stat-value" id="s-total">—</div>
+        <div class="stat-meta" id="s-total-meta">registered</div>
+      </div>
+      <div class="stat stat--gold">
+        <div class="stat-label">Reported</div>
+        <div class="stat-value" id="s-reported">—</div>
+        <div class="stat-meta" id="s-reported-meta">this week</div>
+      </div>
+      <div class="stat stat--sage">
+        <div class="stat-label">Met</div>
+        <div class="stat-value" id="s-met">—</div>
+        <div class="stat-meta" id="s-met-meta">groups gathered</div>
+      </div>
+      <div class="stat stat--rose">
+        <div class="stat-label">Avg attendance</div>
+        <div class="stat-value" id="s-avg">—</div>
+        <div class="stat-meta" id="s-avg-meta">people per group</div>
+      </div>
+    </div>
+
+    <!-- charts -->
+    <div class="row" data-pane="row">
+      <div class="panel">
+        <h3>Attendance over time</h3>
+        <p class="panel-sub">Total people gathered, by week</p>
+        <div class="chart-wrap"><canvas id="lineChart" role="img" aria-label="Attendance trend across weeks"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>This week</h3>
+        <p class="panel-sub">Met vs. skipped</p>
+        <div class="chart-wrap" style="height: 220px"><canvas id="donutChart" role="img" aria-label="Met vs skipped donut chart"></canvas></div>
+        <div class="legend" id="donut-legend"></div>
+      </div>
+    </div>
+
+    <!-- prayers -->
+    <section class="prayers" data-pane="prayers">
+      <div class="prayers-head">
+        <h2 class="prayers-title">Prayer <em>requests</em></h2>
+        <span style="color:var(--ink-mute); font-size:0.85rem" id="prayers-count">—</span>
+      </div>
+      <div class="prayers-grid" id="prayers-grid"></div>
+    </section>
+
+    <!-- missing -->
+    <section class="missing" data-pane="missing">
+      <h3>Awaiting reports</h3>
+      <p class="missing-sub" id="missing-sub">Leaders who haven't submitted this week's check-in</p>
+      <ul id="missing-list"></ul>
+    </section>
+
+    <footer class="footer">
+      <span id="footer-time"><span class="live-dot"></span>Last updated · —</span>
+      <span id="footer-name">SOL Church · Grow Groups</span>
+    </footer>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<script>
+/* =========================================================
+   Demo data (used when SHEET_CSV_URL is empty)
+   ========================================================= */
+const DEMO_ROWS = [
+  // week 19 (current week sample)
+  ["2026-05-10 19:30", "111", "John Miller",     "Tracy Sunday",  "yes", "5", "",          "Pray for mom's healing and salvation of relatives",                  "",                     "completed", ""],
+  ["2026-05-10 19:45", "222", "Anna Ivanenko",   "Young Adults",  "yes", "7", "",          "Brother needs a job. Pray for his interview Tuesday.",               "",                     "completed", ""],
+  ["2026-05-10 20:00", "333", "Michael Brown",   "Marriage Grp",  "no",  "",  "",          "",                                                                   "Travel — back next week","skipped",  ""],
+  ["2026-05-10 20:15", "444", "Sergey Levchenko","College Group", "yes", "6", "",          "For our students preparing for finals.",                              "",                     "completed", ""],
+  ["2026-05-10 20:30", "555", "Olha Romanova",   "Wed Night",     "yes", "4", "",          "none",                                                                "",                     "completed", ""],
+  ["2026-05-10 20:45", "666", "David Chen",      "Saturday Grp",  "yes", "5", "",          "Healing for Mark's father after surgery.",                            "",                     "completed", ""],
+  // previous weeks for the trend chart
+  ["2026-05-03 19:30", "111", "John Miller",     "Tracy Sunday",  "yes", "5", "", "", "", "completed", ""],
+  ["2026-05-03 19:45", "222", "Anna Ivanenko",   "Young Adults",  "yes", "6", "", "", "", "completed", ""],
+  ["2026-05-03 20:15", "444", "Sergey Levchenko","College Group", "yes", "7", "", "", "", "completed", ""],
+  ["2026-05-03 20:30", "555", "Olha Romanova",   "Wed Night",     "yes", "4", "", "", "", "completed", ""],
+  ["2026-04-26 19:30", "111", "John Miller",     "Tracy Sunday",  "yes", "4", "", "", "", "completed", ""],
+  ["2026-04-26 19:45", "222", "Anna Ivanenko",   "Young Adults",  "yes", "5", "", "", "", "completed", ""],
+  ["2026-04-26 20:15", "444", "Sergey Levchenko","College Group", "yes", "5", "", "", "", "completed", ""],
+  ["2026-04-19 19:30", "111", "John Miller",     "Tracy Sunday",  "yes", "6", "", "", "", "completed", ""],
+  ["2026-04-19 20:30", "555", "Olha Romanova",   "Wed Night",     "yes", "3", "", "", "", "completed", ""],
+];
+const DEMO_HEADER = ["timestamp","chat_id","leader_name","group_name","attended","attendance_count","topic","prayer_requests","notes","status","prayed_for"];
+
+/* =========================================================
+   Password gate
+   ========================================================= */
+const gate = document.getElementById('gate');
+const app  = document.getElementById('app');
+const pwdInput = document.getElementById('pwd');
+const enterBtn = document.getElementById('enter');
+const errEl    = document.getElementById('err');
+
+function unlock() {
+  sessionStorage.setItem('gg_unlocked', '1');
+  gate.style.display = 'none';
+  app.classList.remove('locked');
+  init();
+}
+
+if (sessionStorage.getItem('gg_unlocked') === '1') {
+  unlock();
+} else {
+  setTimeout(() => pwdInput.focus(), 50);
+}
+
+function tryEnter() {
+  if (pwdInput.value === CONFIG.PASSWORD) {
+    unlock();
+  } else {
+    errEl.textContent = "That doesn't look right.";
+    pwdInput.value = '';
+    pwdInput.focus();
+  }
+}
+enterBtn.addEventListener('click', tryEnter);
+pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryEnter(); });
+
+/* =========================================================
+   Helpers
+   ========================================================= */
+function parseDate(s) {
+  if (!s) return null;
+  const m = String(s).match(/^(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{2})/);
+  if (m) return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5]);
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+function isoWeek(d) {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(t.getUTCFullYear(),0,1));
+  const week = Math.ceil((((t - yearStart) / 86400000) + 1) / 7);
+  return `${t.getUTCFullYear()}-${String(week).padStart(2,'0')}`;
+}
+function weekRange(weekKey) {
+  const [y,w] = weekKey.split('-').map(Number);
+  const jan4 = new Date(Date.UTC(y,0,4));
+  const start = new Date(jan4);
+  start.setUTCDate(jan4.getUTCDate() - (jan4.getUTCDay()||7) + 1 + (w-1)*7);
+  const end = new Date(start);
+  end.setUTCDate(start.getUTCDate() + 6);
+  const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${fmt(start)} – ${fmt(end)}`;
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+/* =========================================================
+   Data load
+   ========================================================= */
+async function loadData() {
+  if (!CONFIG.SHEET_CSV_URL) {
+    document.getElementById('banner').style.display = 'flex';
+    return DEMO_ROWS.map(r => Object.fromEntries(DEMO_HEADER.map((h,i)=>[h, r[i]])));
+  }
+  const res = await fetch(CONFIG.SHEET_CSV_URL + '&_=' + Date.now());
+  const text = await res.text();
+  const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+  return parsed.data;
+}
+
+/* =========================================================
+   Render
+   ========================================================= */
+let lineChart, donutChart;
+let allRows = [];
+
+async function init() {
+  document.getElementById('church-name').textContent = CONFIG.CHURCH_NAME;
+  document.getElementById('footer-name').textContent = `${CONFIG.CHURCH_NAME} · ${CONFIG.DASHBOARD_TITLE}`;
+
+  try {
+    allRows = (await loadData()).filter(r => r.timestamp);
+  } catch (e) {
+    allRows = [];
+    console.error(e);
+  }
+
+  // distinct weeks (newest first)
+  const weeks = new Map();
+  for (const r of allRows) {
+    const d = parseDate(r.timestamp);
+    if (!d) continue;
+    const k = isoWeek(d);
+    if (!weeks.has(k)) weeks.set(k, weekRange(k));
+  }
+  const weekSel = document.getElementById('week');
+  weekSel.innerHTML = '';
+  if (weeks.size === 0) {
+    weekSel.innerHTML = '<option>No reports yet</option>';
+  } else {
+    [...weeks.entries()].sort((a,b)=>a[0]<b[0]?1:-1).forEach(([k,label]) => {
+      weekSel.insertAdjacentHTML('beforeend', `<option value="${k}">${label}</option>`);
+    });
+  }
+  weekSel.addEventListener('change', render);
+  document.getElementById('refresh').addEventListener('click', async () => {
+    document.getElementById('refresh').textContent = '…';
+    allRows = (await loadData()).filter(r => r.timestamp);
+    render();
+    setTimeout(()=> location.reload(), 100);
+  });
+
+  render();
+  requestAnimationFrame(() => {
+    document.querySelectorAll('[data-pane]').forEach(el => el.classList.add('ready'));
+  });
+
+  // Auto-refresh every 5 minutes while the page is open
+  setInterval(async () => {
+    if (sessionStorage.getItem('gg_unlocked') !== '1') return;
+    if (document.hidden) return; // skip when tab is in the background
+    try {
+      const fresh = (await loadData()).filter(r => r.timestamp);
+      if (fresh.length) {
+        allRows = fresh;
+        render();
+      }
+    } catch (e) {
+      console.warn('Auto-refresh failed:', e);
+    }
+  }, 5 * 60 * 1000);
+}
+
+function render() {
+  const weekSel = document.getElementById('week');
+  const weekKey = weekSel.value;
+
+  // ---- stats for selected week ----
+  const weekRows = allRows.filter(r => {
+    const d = parseDate(r.timestamp);
+    return d && isoWeek(d) === weekKey;
+  });
+  const totalLeaders = new Set(allRows.map(r => r.chat_id).filter(Boolean)).size || weekRows.length;
+  const reported = weekRows.length;
+  const met = weekRows.filter(r => String(r.attended).toLowerCase() === 'yes').length;
+  const skipped = weekRows.filter(r => String(r.attended).toLowerCase() === 'no').length;
+  const counts = weekRows.map(r => parseInt(r.attendance_count, 10)).filter(n => !isNaN(n) && n>0);
+  const avg = counts.length ? (counts.reduce((a,b)=>a+b,0) / counts.length) : 0;
+
+  document.getElementById('s-total').textContent = totalLeaders || 0;
+  document.getElementById('s-reported').textContent = reported;
+  document.getElementById('s-reported-meta').textContent = totalLeaders
+    ? `${Math.round(reported / totalLeaders * 100)}% of leaders`
+    : 'this week';
+  document.getElementById('s-met').textContent = met;
+  document.getElementById('s-met-meta').textContent = `of ${reported} reported`;
+  document.getElementById('s-avg').textContent = counts.length ? avg.toFixed(1) : '—';
+
+  // ---- line chart ----
+  const byWeek = new Map();
+  for (const r of allRows) {
+    const d = parseDate(r.timestamp);
+    if (!d) continue;
+    const k = isoWeek(d);
+    const n = parseInt(r.attendance_count, 10);
+    if (!byWeek.has(k)) byWeek.set(k, 0);
+    if (!isNaN(n) && n>0) byWeek.set(k, byWeek.get(k) + n);
+  }
+  const sortedWeeks = [...byWeek.entries()].sort((a,b)=>a[0]<b[0]?-1:1);
+  const labels = sortedWeeks.map(([k]) => weekRange(k));
+  const values = sortedWeeks.map(([,v]) => v);
+
+  if (lineChart) lineChart.destroy();
+  lineChart = new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'People',
+        data: values,
+        borderColor: '#C16545',
+        backgroundColor: 'rgba(193, 101, 69, 0.10)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#C16545',
+        pointBorderColor: '#FFFFFF',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        tension: 0.32,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#2D1F12', padding: 10, titleFont: { family: 'Manrope', weight: 600 }, bodyFont: { family: 'Manrope' } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#9C8769', font: { family: 'Manrope', size: 11 } } },
+        y: { beginAtZero: true, grid: { color: '#EFE7D2' }, ticks: { color: '#9C8769', font: { family: 'Manrope', size: 11 }, precision: 0 } }
+      }
+    }
+  });
+
+  // ---- donut ----
+  if (donutChart) donutChart.destroy();
+  const donutValues = [met, skipped];
+  donutChart = new Chart(document.getElementById('donutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Met', 'Skipped'],
+      datasets: [{
+        data: donutValues,
+        backgroundColor: ['#7E8F62', '#B97A6E'],
+        borderColor: '#FDFAF1',
+        borderWidth: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '68%',
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#2D1F12', padding: 10 } }
+    }
+  });
+  document.getElementById('donut-legend').innerHTML =
+    `<span><span class="sw" style="background:#7E8F62"></span>Met · ${met}</span>` +
+    `<span><span class="sw" style="background:#B97A6E"></span>Skipped · ${skipped}</span>`;
+
+  // ---- prayers ----
+  const prayers = weekRows
+    .filter(r => r.prayer_requests && !['none','no','n/a','-',''].includes(String(r.prayer_requests).trim().toLowerCase()));
+  const grid = document.getElementById('prayers-grid');
+  document.getElementById('prayers-count').textContent = `${prayers.length} this week`;
+  if (prayers.length === 0) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-mark">❦</div><p>No prayer requests submitted this week yet.</p></div>`;
+  } else {
+    grid.innerHTML = prayers.map(p => `
+      <article class="prayer">
+        <p class="prayer-text">${escapeHtml(p.prayer_requests)}</p>
+        <div class="prayer-meta">
+          <b>${escapeHtml(p.leader_name || '—')}</b>
+          <span>${escapeHtml(p.group_name || '')}</span>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  // ---- missing ----
+  // leaders who reported in any prior week but not this one
+  const reportedThisWeek = new Set(weekRows.map(r => r.chat_id));
+  const leaderHistory = new Map();
+  for (const r of allRows) {
+    if (!leaderHistory.has(r.chat_id)) leaderHistory.set(r.chat_id, { name: r.leader_name, group: r.group_name });
+  }
+  const missing = [...leaderHistory.entries()]
+    .filter(([id]) => !reportedThisWeek.has(id))
+    .map(([,v]) => v)
+    .filter(v => v.name);
+
+  const list = document.getElementById('missing-list');
+  const sub  = document.getElementById('missing-sub');
+  if (missing.length === 0) {
+    sub.textContent = 'Everyone has reported this week 🙌';
+    list.innerHTML = '';
+  } else {
+    sub.textContent = `${missing.length} leader${missing.length===1?'':'s'} haven't submitted this week's check-in`;
+    list.innerHTML = missing.map(m => `
+      <li>
+        <span class="missing-name">${escapeHtml(m.name)}</span>
+        <span class="missing-group">${escapeHtml(m.group || '')}</span>
+      </li>
+    `).join('');
+  }
+
+  // footer
+  const now = new Date();
+  document.getElementById('footer-time').innerHTML =
+    '<span class="live-dot"></span>Last updated · ' + now.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+</script>
+</body>
+</html>
