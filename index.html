@@ -19,7 +19,14 @@
     // 1. The published CSV URL of your "Reports" tab.
     //    In Google Sheets: File → Share → Publish to web → Sheet: "Reports", Format: CSV → Publish.
     //    Paste the resulting URL here. Leave blank to use demo data.
+    SHEET_CSV_URL: "",
+
+    // 1b. (Optional) The published CSV URL of your "Leaders" tab.
+    //     Enables the "Leaders & their groups" section with member lists.
+    //     Same steps: File → Share → Publish to web → Sheet: "Leaders" → CSV → Publish.
+    //     Leave blank to hide the section.
     SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQ9qTQX--HhhKgZcoVvUn0PtGMZDiTVkvAeFaQ16-5fiT9s928iY1v6CongROXvsaeBDQbBS-iN-iR/pub?gid=146641384&single=true&output=csv",
+
 
     // 2. Dashboard password. Change this; everyone with the link must enter it.
     //    (Client-side only — a courtesy gate, not enterprise security.)
@@ -404,6 +411,146 @@ button { font-family: inherit; }
 }
 .empty-mark { font-family: var(--serif); font-size: 2.5rem; color: var(--gold); margin-bottom: 0.5rem; }
 
+/* ========== leaders accordion ========== */
+.leaders-section { margin-top: 3rem; }
+.leaders-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.leaders-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.leaders-title em { font-style: italic; color: var(--terracotta); font-weight: 300; }
+.leaders-sub {
+  font-size: 0.88rem;
+  color: var(--ink-mute);
+  margin: -0.5rem 0 1.5rem;
+}
+.leaders-list {
+  display: flex; flex-direction: column;
+  gap: 0.5rem;
+}
+.leader-card {
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.leader-card.open { border-color: var(--line); }
+.leader-toggle {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 1.5rem;
+  align-items: center;
+  width: 100%;
+  background: transparent; border: 0;
+  padding: 1.1rem 1.4rem;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: background .15s;
+}
+.leader-toggle:hover { background: var(--card-warm); }
+.leader-name {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.leader-quick {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+.leader-chevron {
+  font-size: 0.85rem;
+  color: var(--ink-mute);
+  transition: transform .25s;
+  font-family: var(--serif);
+}
+.leader-card.open .leader-chevron { transform: rotate(180deg); }
+.leader-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 0 1.4rem 1.5rem;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 1.5rem;
+  animation: revealDown .3s ease;
+}
+@media (max-width: 720px) {
+  .leader-details { grid-template-columns: 1fr; }
+}
+@keyframes revealDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+.detail-block h4 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin: 0 0 0.75rem;
+}
+.members-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 0.25rem;
+}
+.members-list li {
+  font-size: 0.95rem;
+  color: var(--ink);
+  display: flex; align-items: baseline; gap: 0.5rem;
+}
+.members-list li::before {
+  content: '❦';
+  color: var(--gold);
+  font-family: var(--serif);
+  font-size: 0.9rem;
+}
+.detail-stats {
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 0.4rem 1rem;
+  font-size: 0.92rem;
+}
+.detail-stats dt { color: var(--ink-soft); }
+.detail-stats dd { color: var(--ink); font-weight: 500; margin: 0; text-align: right; }
+.last-prayer {
+  background: var(--card-warm);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--ink);
+  line-height: 1.45;
+  margin-top: 0.5rem;
+  position: relative;
+}
+.last-prayer::before {
+  content: '"';
+  font-family: var(--serif);
+  font-size: 2rem;
+  color: var(--terracotta-soft);
+  position: absolute;
+  top: -0.1rem; left: 0.4rem;
+  line-height: 1;
+}
+.last-prayer-text { padding-left: 1.3rem; }
+.no-members-hint {
+  font-size: 0.85rem;
+  color: var(--ink-mute);
+  font-style: italic;
+}
+
 /* ========== footer ========== */
 .footer {
   margin-top: 4rem;
@@ -436,6 +583,7 @@ button { font-family: inherit; }
 [data-pane="row"]     { transition-delay: .15s; }
 [data-pane="prayers"] { transition-delay: .25s; }
 [data-pane="missing"] { transition-delay: .35s; }
+[data-pane="leaders"] { transition-delay: .45s; }
 
 /* hide app until unlocked */
 .app.locked { display: none; }
@@ -538,6 +686,16 @@ button { font-family: inherit; }
       <ul id="missing-list"></ul>
     </section>
 
+    <!-- leaders & their groups -->
+    <section class="leaders-section" data-pane="leaders">
+      <div class="leaders-head">
+        <h2 class="leaders-title">Leaders <em>& their groups</em></h2>
+        <span style="color:var(--ink-mute); font-size:0.85rem" id="leaders-count">—</span>
+      </div>
+      <p class="leaders-sub">Tap a leader to see members and history.</p>
+      <div class="leaders-list" id="leaders-list"></div>
+    </section>
+
     <footer class="footer">
       <span id="footer-time"><span class="live-dot"></span>Last updated · —</span>
       <span id="footer-name">SOL Church · Grow Groups</span>
@@ -572,6 +730,16 @@ const DEMO_ROWS = [
   ["2026-04-19 20:30", "555", "Olha Romanova",   "Wed Night",     "yes", "3", "", "", "", "completed", ""],
 ];
 const DEMO_HEADER = ["timestamp","chat_id","leader_name","group_name","attended","attendance_count","topic","prayer_requests","notes","status","prayed_for"];
+
+const DEMO_LEADERS_HEADER = ["user_id","full_name","username","group_name","active","registered_at","onboarded","members"];
+const DEMO_LEADERS = [
+  ["111", "John Miller",      "johnm",    "", "yes", "2026-04-01 10:00", "yes", "Anna Smith, Maria Petrenko, David Lee"],
+  ["222", "Anna Ivanenko",    "annai",    "", "yes", "2026-04-02 10:00", "yes", "Kate Brown, Olha Romaniuk, Petro Hrytsiuk, Lesia Ivanchuk"],
+  ["333", "Michael Brown",    "mikeb",    "", "yes", "2026-04-03 10:00", "yes", "Tom Wilson, Sarah Adams"],
+  ["444", "Sergey Levchenko", "serge_l",  "", "yes", "2026-04-04 10:00", "yes", "Andrew Kim, Ben Park, Chris Lee, Dan Cho, Eric Han"],
+  ["555", "Olha Romanova",    "olharomas","", "yes", "2026-04-05 10:00", "yes", "Iryna Tkach, Vita Yarema"],
+  ["666", "David Chen",       "davidc",   "", "yes", "2026-04-06 10:00", "yes", "Mark Lin, Joshua Wong, Daniel Park, Sam Choi"],
+];
 
 /* =========================================================
    Password gate
@@ -655,20 +823,42 @@ async function loadData() {
   return parsed.data;
 }
 
+async function loadLeaders() {
+  // If neither real-data CSV nor demo is in use, return empty.
+  if (!CONFIG.SHEET_CSV_URL && !CONFIG.LEADERS_CSV_URL) {
+    return DEMO_LEADERS.map(r => Object.fromEntries(DEMO_LEADERS_HEADER.map((h,i)=>[h, r[i]])));
+  }
+  if (!CONFIG.LEADERS_CSV_URL) return [];
+  try {
+    const res = await fetch(CONFIG.LEADERS_CSV_URL + '&_=' + Date.now());
+    const text = await res.text();
+    const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+    return parsed.data;
+  } catch (e) {
+    console.warn('Could not load Leaders CSV:', e);
+    return [];
+  }
+}
+
 /* =========================================================
    Render
    ========================================================= */
 let lineChart, donutChart;
 let allRows = [];
+let allLeaders = [];
 
 async function init() {
   document.getElementById('church-name').textContent = CONFIG.CHURCH_NAME;
   document.getElementById('footer-name').textContent = `${CONFIG.CHURCH_NAME} · ${CONFIG.DASHBOARD_TITLE}`;
 
   try {
-    allRows = (await loadData()).filter(r => r.timestamp);
+    [allRows, allLeaders] = await Promise.all([
+      loadData().then(rows => rows.filter(r => r.timestamp)),
+      loadLeaders(),
+    ]);
   } catch (e) {
     allRows = [];
+    allLeaders = [];
     console.error(e);
   }
 
@@ -707,9 +897,13 @@ async function init() {
     if (sessionStorage.getItem('gg_unlocked') !== '1') return;
     if (document.hidden) return; // skip when tab is in the background
     try {
-      const fresh = (await loadData()).filter(r => r.timestamp);
+      const [fresh, freshLeaders] = await Promise.all([
+        loadData().then(rows => rows.filter(r => r.timestamp)),
+        loadLeaders(),
+      ]);
       if (fresh.length) {
         allRows = fresh;
+        allLeaders = freshLeaders;
         render();
       }
     } catch (e) {
@@ -861,6 +1055,172 @@ function render() {
   const now = new Date();
   document.getElementById('footer-time').innerHTML =
     '<span class="live-dot"></span>Last updated · ' + now.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+
+  renderLeaders();
+}
+
+function renderLeaders() {
+  const list = document.getElementById('leaders-list');
+  const countEl = document.getElementById('leaders-count');
+
+  // Build a map: user_id -> leader info (from Leaders tab if available)
+  const leaderMap = new Map();
+  for (const ld of allLeaders) {
+    const uid = String(ld.user_id || '').trim();
+    if (!uid) continue;
+    const onboarded = String(ld.onboarded || '').trim().toLowerCase() === 'yes';
+    if (!onboarded) continue; // don't show people who haven't finished /start
+    leaderMap.set(uid, {
+      name: String(ld.full_name || '').trim(),
+      members: String(ld.members || '').trim(),
+    });
+  }
+
+  // Aggregate per leader from reports
+  const statsByUid = new Map();
+  for (const r of allRows) {
+    const uid = String(r.chat_id || '').trim();
+    if (!uid) continue;
+    if (!statsByUid.has(uid)) {
+      statsByUid.set(uid, {
+        uid,
+        name: String(r.leader_name || '').trim(),
+        reports: [],
+        met: 0, skipped: 0,
+        attendanceSum: 0, attendanceCount: 0,
+        lastTimestamp: null,
+        lastPrayer: '',
+      });
+    }
+    const s = statsByUid.get(uid);
+    s.reports.push(r);
+    const attended = String(r.attended || '').toLowerCase() === 'yes';
+    if (attended) s.met++;
+    else if (String(r.attended || '').toLowerCase() === 'no') s.skipped++;
+
+    const n = parseInt(r.attendance_count, 10);
+    if (!isNaN(n) && n > 0) {
+      s.attendanceSum += n;
+      s.attendanceCount++;
+    }
+
+    const d = parseDate(r.timestamp);
+    if (d && (!s.lastTimestamp || d > s.lastTimestamp)) {
+      s.lastTimestamp = d;
+    }
+
+    const prayer = String(r.prayer_requests || '').trim();
+    if (prayer && !['none','no','n/a','-',''].includes(prayer.toLowerCase())) {
+      // keep latest prayer
+      if (!s._latestPrayerDate || (d && d >= s._latestPrayerDate)) {
+        s.lastPrayer = prayer;
+        s._latestPrayerDate = d;
+      }
+    }
+  }
+
+  // Merge in name/members from leaderMap
+  for (const [uid, info] of leaderMap.entries()) {
+    if (!statsByUid.has(uid)) {
+      statsByUid.set(uid, {
+        uid, name: info.name, reports: [],
+        met: 0, skipped: 0, attendanceSum: 0, attendanceCount: 0,
+        lastTimestamp: null, lastPrayer: '',
+      });
+    }
+    const s = statsByUid.get(uid);
+    if (info.name) s.name = info.name;
+    s.members = info.members;
+  }
+
+  // Convert to array, sort by # reports desc (then by name)
+  const leadersArr = [...statsByUid.values()]
+    .filter(s => s.name)
+    .sort((a, b) => b.reports.length - a.reports.length || a.name.localeCompare(b.name));
+
+  countEl.textContent = `${leadersArr.length} ${leadersArr.length === 1 ? 'leader' : 'leaders'}`;
+
+  if (leadersArr.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="empty-mark">❦</div><p>No leaders yet.</p></div>`;
+    return;
+  }
+
+  // Remember which cards are open before re-rendering
+  const openIds = new Set();
+  list.querySelectorAll('.leader-card.open').forEach(el => openIds.add(el.dataset.uid));
+
+  list.innerHTML = leadersArr.map(s => {
+    const avg = s.attendanceCount ? (s.attendanceSum / s.attendanceCount).toFixed(1) : '—';
+    const lastCheckIn = s.lastTimestamp ? relativeTime(s.lastTimestamp) : '—';
+    const total = s.reports.length;
+    const metPct = total ? Math.round(s.met / total * 100) : 0;
+
+    const members = (s.members || '').split(',').map(m => m.trim()).filter(Boolean);
+    const membersHtml = members.length
+      ? `<ul class="members-list">${members.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul>`
+      : `<p class="no-members-hint">Not provided yet — leader can send /members in the bot.</p>`;
+
+    const prayerHtml = s.lastPrayer
+      ? `<div class="last-prayer"><span class="last-prayer-text">${escapeHtml(s.lastPrayer)}</span></div>`
+      : `<p class="no-members-hint">No prayer requests yet.</p>`;
+
+    const isOpen = openIds.has(s.uid) ? ' open' : '';
+
+    return `
+      <div class="leader-card${isOpen}" data-uid="${escapeHtml(s.uid)}">
+        <button class="leader-toggle" onclick="toggleLeader(this)" aria-expanded="${isOpen ? 'true' : 'false'}">
+          <span class="leader-name">${escapeHtml(s.name)}</span>
+          <span class="leader-quick">${total} ${total===1?'report':'reports'} · avg ${avg}</span>
+          <span class="leader-chevron">⌄</span>
+        </button>
+        <div class="leader-details" ${isOpen ? '' : 'hidden'}>
+          <div class="detail-block">
+            <h4>Members${members.length ? ` (${members.length})` : ''}</h4>
+            ${membersHtml}
+          </div>
+          <div class="detail-block">
+            <h4>Statistics</h4>
+            <dl class="detail-stats">
+              <dt>Total reports</dt>      <dd>${total}</dd>
+              <dt>Met</dt>                <dd>${s.met}${total ? ` (${metPct}%)` : ''}</dd>
+              <dt>Skipped</dt>            <dd>${s.skipped}</dd>
+              <dt>Avg attendance</dt>     <dd>${avg}</dd>
+              <dt>Last check-in</dt>      <dd>${lastCheckIn}</dd>
+            </dl>
+            <h4 style="margin-top:1.25rem">Last prayer request</h4>
+            ${prayerHtml}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleLeader(btn) {
+  const card = btn.closest('.leader-card');
+  const details = card.querySelector('.leader-details');
+  const isOpen = card.classList.toggle('open');
+  if (isOpen) {
+    details.removeAttribute('hidden');
+    btn.setAttribute('aria-expanded', 'true');
+  } else {
+    details.setAttribute('hidden', '');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+}
+window.toggleLeader = toggleLeader;
+
+function relativeTime(d) {
+  const now = new Date();
+  const diff = (now - d) / 1000;
+  if (diff < 60)      return 'just now';
+  if (diff < 3600)    return Math.floor(diff / 60) + ' min ago';
+  if (diff < 86400)   return Math.floor(diff / 3600) + ' hr ago';
+  if (diff < 86400*7) {
+    const days = Math.floor(diff / 86400);
+    return days + (days === 1 ? ' day ago' : ' days ago');
+  }
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 </script>
 </body>
