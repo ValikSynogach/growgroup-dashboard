@@ -19,14 +19,13 @@
     // 1. The published CSV URL of your "Reports" tab.
     //    In Google Sheets: File → Share → Publish to web → Sheet: "Reports", Format: CSV → Publish.
     //    Paste the resulting URL here. Leave blank to use demo data.
-    SHEET_CSV_URL: "",
+    SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQ9qTQX--HhhKgZcoVvUn0PtGMZDiTVkvAeFaQ16-5fiT9s928iY1v6CongROXvsaeBDQbBS-iN-iR/pub?gid=146641384&single=true&output=csv",
 
     // 1b. (Optional) The published CSV URL of your "Leaders" tab.
     //     Enables the "Leaders & their groups" section with member lists.
     //     Same steps: File → Share → Publish to web → Sheet: "Leaders" → CSV → Publish.
     //     Leave blank to hide the section.
-    SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQ9qTQX--HhhKgZcoVvUn0PtGMZDiTVkvAeFaQ16-5fiT9s928iY1v6CongROXvsaeBDQbBS-iN-iR/pub?gid=146641384&single=true&output=csv",
-
+    LEADERS_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQ9qTQX--HhhKgZcoVvUn0PtGMZDiTVkvAeFaQ16-5fiT9s928iY1v6CongROXvsaeBDQbBS-iN-iR/pub?gid=2040875068&single=true&output=csv",
 
     // 2. Dashboard password. Change this; everyone with the link must enter it.
     //    (Client-side only — a courtesy gate, not enterprise security.)
@@ -477,16 +476,19 @@ button { font-family: inherit; }
 }
 .leader-card.open .leader-chevron { transform: rotate(180deg); }
 .leader-details {
-  display: grid;
+  display: none;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   padding: 0 1.4rem 1.5rem;
   border-top: 1px solid var(--line-soft);
   padding-top: 1.5rem;
+}
+.leader-card.open .leader-details {
+  display: grid;
   animation: revealDown .3s ease;
 }
 @media (max-width: 720px) {
-  .leader-details { grid-template-columns: 1fr; }
+  .leader-card.open .leader-details { grid-template-columns: 1fr; }
 }
 @keyframes revealDown {
   from { opacity: 0; transform: translateY(-4px); }
@@ -1158,7 +1160,9 @@ function renderLeaders() {
     const members = (s.members || '').split(',').map(m => m.trim()).filter(Boolean);
     const membersHtml = members.length
       ? `<ul class="members-list">${members.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul>`
-      : `<p class="no-members-hint">Not provided yet — leader can send /members in the bot.</p>`;
+      : (CONFIG.LEADERS_CSV_URL
+          ? `<p class="no-members-hint">Not provided yet — leader can send /members in the bot.</p>`
+          : `<p class="no-members-hint">Members list not loaded.<br>Publish the <b>Leaders</b> tab as CSV and add the URL to <code>CONFIG.LEADERS_CSV_URL</code> in index.html.</p>`);
 
     const prayerHtml = s.lastPrayer
       ? `<div class="last-prayer"><span class="last-prayer-text">${escapeHtml(s.lastPrayer)}</span></div>`
@@ -1173,7 +1177,7 @@ function renderLeaders() {
           <span class="leader-quick">${total} ${total===1?'report':'reports'} · avg ${avg}</span>
           <span class="leader-chevron">⌄</span>
         </button>
-        <div class="leader-details" ${isOpen ? '' : 'hidden'}>
+        <div class="leader-details">
           <div class="detail-block">
             <h4>Members${members.length ? ` (${members.length})` : ''}</h4>
             ${membersHtml}
@@ -1198,15 +1202,8 @@ function renderLeaders() {
 
 function toggleLeader(btn) {
   const card = btn.closest('.leader-card');
-  const details = card.querySelector('.leader-details');
   const isOpen = card.classList.toggle('open');
-  if (isOpen) {
-    details.removeAttribute('hidden');
-    btn.setAttribute('aria-expanded', 'true');
-  } else {
-    details.setAttribute('hidden', '');
-    btn.setAttribute('aria-expanded', 'false');
-  }
+  btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
 }
 window.toggleLeader = toggleLeader;
 
