@@ -39,6 +39,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
           <span data-i18n="refresh">Refresh</span>
         </button>
+        <button class="btn-ghost" id="download-open" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><polyline points="7 11 12 16 17 11"></polyline><path d="M5 21h14"></path></svg>
+          <span data-i18n="download">Download data</span>
+        </button>
       </div>
     </header>
 
@@ -115,8 +119,31 @@
 
     <footer class="footer">
       <span id="footer-time"><span class="live-dot"></span>Last updated · —</span>
-      <span><span id="footer-name">SOL HSM · Grow Groups</span> · <a id="footer-switch" href="index.html">SOL Youth</a></span>
+      <span><span id="footer-name">SOL HSM · Grow Groups</span> · <a id="footer-switch" href="index.html">SOL Adult</a></span>
     </footer>
+  </div>
+
+  <div class="modal" id="download-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="download-title">
+      <h2 id="download-title" data-i18n="downloadTitle">Download data</h2>
+      <p class="modal-sub" id="download-hint">SOL HSM only. Reports use the dates below. Leaders are the current roster. Adult rows are not included.</p>
+      <div class="presets">
+        <button class="preset" type="button" data-preset="7" data-i18n="last7">Last 7 days</button>
+        <button class="preset" type="button" data-preset="30" data-i18n="last30">Last 30 days</button>
+        <button class="preset" type="button" data-preset="90" data-i18n="last90">Last 90 days</button>
+        <button class="preset active" type="button" data-preset="all" data-i18n="allTime">All</button>
+      </div>
+      <div class="date-row">
+        <label><span data-i18n="fromLabel">From</span><input id="export-from" type="date" /></label>
+        <label><span data-i18n="toLabel">To</span><input id="export-to" type="date" /></label>
+      </div>
+      <p class="export-count" id="export-count"></p>
+      <div class="modal-actions">
+        <button class="gate-btn" id="export-csv" type="button" data-i18n="downloadCsv">Download CSV</button>
+        <button class="btn-ghost" id="export-md" type="button" data-i18n="downloadMd">Markdown for AI</button>
+      </div>
+      <button class="modal-close" id="download-close" type="button" data-i18n="close">Close</button>
+    </div>
   </div>
 </div>
 
@@ -133,10 +160,11 @@
     TITLE_HTML: "SOL <em>HSM</em>",
     FOOTER_NAME: "SOL HSM · Grow Groups",
     OTHER_HREF: "index.html",
-    OTHER_LABEL: "SOL Youth",
+    OTHER_LABEL: "SOL Adult",
   });
 </script>
 <script src="ministry.js"></script>
+<script src="export.js"></script>
 <script src="dashboard.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-/* Shared Grow Groups dashboard. index.html is SOL Youth; hsm.html is SOL HSM.
+/* Shared Grow Groups dashboard. index.html is SOL Adult; hsm.html is SOL HSM.
    Both pages load the same CSVs. Ministry.belongsTo decides which rows each
    page keeps, on the first load and on every refresh. */
 "use strict";
@@ -77,6 +77,18 @@ const COPY = {
     lastPrayer: "Last prayer request",
     noPrayerYet: "No prayer requests yet.",
     people: "People",
+    download: "Download data",
+    downloadTitle: "Download data",
+    last7: "Last 7 days",
+    last30: "Last 30 days",
+    last90: "Last 90 days",
+    allTime: "All",
+    fromLabel: "From",
+    toLabel: "To",
+    downloadCsv: "Download CSV",
+    downloadMd: "Markdown for AI",
+    close: "Close",
+    downloadHint: "SOL HSM only. Reports use the dates below. Leaders are the current roster. Adult rows are not included.",
     loadFailed: "Couldn't load the sheet.",
     loadFailedRest: "Refresh the page to try again.",
     emptyYouth: "No reports yet.",
@@ -130,6 +142,18 @@ const COPY = {
     lastPrayer: "Остання молитовна потреба",
     noPrayerYet: "Молитовних потреб ще немає.",
     people: "Люди",
+    download: "Завантажити дані",
+    downloadTitle: "Завантажити дані",
+    last7: "7 днів",
+    last30: "30 днів",
+    last90: "90 днів",
+    allTime: "Усі",
+    fromLabel: "Від",
+    toLabel: "До",
+    downloadCsv: "Завантажити CSV",
+    downloadMd: "Текст для ШІ",
+    close: "Закрити",
+    downloadHint: "Лише SOL Adult. Звіти — за обрані дати, лідери — поточний список. Рядки SOL HSM сюди не входять.",
     loadFailed: "Не вдалося завантажити таблицю.",
     loadFailedRest: "Оновіть сторінку, щоб спробувати ще раз.",
     emptyYouth: "Звітів ще немає.",
@@ -557,6 +581,7 @@ function render() {
     '<span class="live-dot"></span>' + escapeHtml(t("updated")) + " · " + now.toLocaleString(t("locale"), { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
   renderLeaders();
+  if (typeof refreshExportCount === "function") refreshExportCount();
 }
 
 function renderLeaders() {
@@ -752,9 +777,164 @@ function applyBranding() {
   if (line) line.setAttribute("aria-label", t("chartAria"));
   const donut = document.getElementById("donutChart");
   if (donut) donut.setAttribute("aria-label", t("donutAria"));
+  const hint = document.getElementById("download-hint");
+  if (hint) hint.textContent = t("downloadHint");
+}
+
+function isoDay(date) {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function ministryLabel() {
+  return CONFIG.MINISTRY === "hsm" ? "SOL HSM" : "SOL Adult";
+}
+
+function exportLeaderRows() {
+  return allLeaders
+    .filter((ld) => String(ld.onboarded || "").trim().toLowerCase() === "yes")
+    .map((ld) => ({
+      user_id: String(Ministry.cell(ld, "user_id") || "").trim(),
+      name: String(Ministry.cell(ld, "full_name") || "").trim(),
+      members: String(Ministry.cell(ld, "members") || "").trim(),
+      friend_group: String(Ministry.cell(ld, "friend_group") || "").trim(),
+    }))
+    .filter((ld) => ld.name || ld.user_id)
+    .sort((a, b) => a.name.localeCompare(b.name, t("locale")));
+}
+
+function exportReportRows(from, to) {
+  return Export.reportsInRange(allRows, from, to)
+    .map((row) => ({
+      timestamp: row.timestamp || "",
+      chat_id: row.chat_id || "",
+      leader_name: row.leader_name || "",
+      group_name: row.group_name || "",
+      attended: row.attended || "",
+      attendance_count: row.attendance_count || "",
+      prayer_requests: row.prayer_requests || "",
+      ministry: Ministry.normalizeMinistry(Ministry.ministryRaw(row)),
+    }))
+    .sort((a, b) => String(a.timestamp).localeCompare(String(b.timestamp)));
+}
+
+function saveFile(filename, mime, text) {
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+let refreshExportCount = null;
+
+function setupDownload() {
+  const modal = document.getElementById("download-modal");
+  const fromInput = document.getElementById("export-from");
+  const toInput = document.getElementById("export-to");
+  const openBtn = document.getElementById("download-open");
+  if (!modal || !fromInput || !toInput || !openBtn) return;
+
+  let preset = "all";
+
+  function markPreset() {
+    modal.querySelectorAll("[data-preset]").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.preset === preset);
+    });
+  }
+
+  function currentRange() {
+    return { from: fromInput.value || "", to: toInput.value || "" };
+  }
+
+  refreshExportCount = function refreshExportCount() {
+    const { from, to } = currentRange();
+    const reports = exportReportRows(from, to);
+    const leaders = exportLeaderRows();
+    const el = document.getElementById("export-count");
+    if (!el) return;
+    el.textContent = lang() === "en"
+      ? `${reports.length} ${reports.length === 1 ? "report" : "reports"} · ${leaders.length} ${leaders.length === 1 ? "leader" : "leaders"}`
+      : `${reports.length} ${reportsWord(reports.length)} · ${leaders.length} ${leadersWord(leaders.length)}`;
+  };
+
+  function applyPreset(name) {
+    preset = name;
+    if (name === "all") {
+      fromInput.value = "";
+      toInput.value = "";
+    } else {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(end.getDate() - (Number(name) - 1));
+      fromInput.value = isoDay(start);
+      toInput.value = isoDay(end);
+    }
+    markPreset();
+    refreshExportCount();
+  }
+
+  openBtn.addEventListener("click", () => {
+    modal.hidden = false;
+    refreshExportCount();
+    fromInput.focus();
+  });
+  document.getElementById("download-close").addEventListener("click", () => {
+    modal.hidden = true;
+  });
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) modal.hidden = true;
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !modal.hidden) modal.hidden = true;
+  });
+  modal.querySelectorAll("[data-preset]").forEach((btn) => {
+    btn.addEventListener("click", () => applyPreset(btn.dataset.preset));
+  });
+  fromInput.addEventListener("change", () => {
+    preset = "";
+    markPreset();
+    refreshExportCount();
+  });
+  toInput.addEventListener("change", () => {
+    preset = "";
+    markPreset();
+    refreshExportCount();
+  });
+
+  function fileSlug(ext) {
+    const { from, to } = currentRange();
+    const who = CONFIG.MINISTRY === "hsm" ? "sol-hsm" : "sol-adult";
+    const span = !from && !to ? "all" : `${from || "start"}_${to || "end"}`;
+    return `${who}-${span}.${ext}`;
+  }
+
+  document.getElementById("export-csv").addEventListener("click", () => {
+    const { from, to } = currentRange();
+    saveFile(fileSlug("csv"), "text/csv;charset=utf-8", Export.reportsCsv(exportReportRows(from, to)));
+  });
+  document.getElementById("export-md").addEventListener("click", () => {
+    const { from, to } = currentRange();
+    const text = Export.summaryMarkdown({
+      label: ministryLabel(),
+      from,
+      to,
+      leaders: exportLeaderRows(),
+      reports: exportReportRows(from, to),
+    });
+    saveFile(fileSlug("md"), "text/markdown;charset=utf-8", text);
+  });
+
+  applyPreset("all");
 }
 
 applyBranding();
+setupDownload();
 if (sessionStorage.getItem("gg_unlocked") === "1") {
   unlock();
 } else {

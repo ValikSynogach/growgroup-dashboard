@@ -1,10 +1,10 @@
-/* Ministry split for the SOL Youth and SOL HSM dashboards.
-   Mirrors the bot's normalize_ministry: a row is classified by its own
-   ministry cell, never by the leader's current tag.
+/* Ministry split for the SOL Adult and SOL HSM dashboards.
+   A row is classified by its own ministry cell, never by the leader's current tag.
 
    SOL HSM: HSM, SOL HSM (any case; underscores and hyphens count as spaces).
-   SOL Youth: blank, YOUTH, SOL YOUTH, a missing column, and anything else.
-   Blank historical reports stay on the youth page after a leader moves to HSM.
+   SOL Adult: ADULT, SOL ADULT, a blank cell, a missing column, and anything
+   that is not HSM (including older YOUTH values). Blank historical reports
+   stay on the adult page after a leader moves to HSM.
 */
 (function (root, factory) {
   var api = factory();
@@ -28,7 +28,7 @@
   }
 
   // HSM cards show the friend-group answer. A blank answer falls back to
-  // members. The youth page never reads friend_group.
+  // members. The adult page shows members and does not read friend_group.
   function rosterText(leader, page) {
     var members = String(cell(leader, "members") || "").trim();
     if (page === "hsm") {
@@ -47,19 +47,19 @@
       .split(/\s+/)
       .filter(Boolean)
       .join(" ");
-    return text === "HSM" || text === "SOL HSM" ? "HSM" : "YOUTH";
+    return text === "HSM" || text === "SOL HSM" ? "HSM" : "ADULT";
   }
 
   function isHsm(row) {
     return normalizeMinistry(ministryRaw(row)) === "HSM";
   }
 
-  function isYouth(row) {
+  function isAdult(row) {
     return !isHsm(row);
   }
 
   function belongsTo(row, page) {
-    return page === "hsm" ? isHsm(row) : isYouth(row);
+    return page === "hsm" ? isHsm(row) : isAdult(row);
   }
 
   return {
@@ -67,7 +67,7 @@
     ministryRaw: ministryRaw,
     normalizeMinistry: normalizeMinistry,
     isHsm: isHsm,
-    isYouth: isYouth,
+    isAdult: isAdult,
     belongsTo: belongsTo,
     rosterText: rosterText,
   };

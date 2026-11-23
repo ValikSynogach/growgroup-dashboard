@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Grow Groups · SOL Church</title>
+<title>SOL Adult · Grow Groups</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -11,12 +11,12 @@
 </head>
 <body>
 
-<!-- Sheet URLs and the password live in config.js. This page is SOL Youth. -->
+<!-- Sheet URLs and the password live in config.js. This page is SOL Adult. -->
 <div class="gate" id="gate">
   <div class="gate-card">
     <div class="gate-mark">✦</div>
     <h1 class="gate-title" data-i18n="gateTitle">Вітаємо 🙏</h1>
-    <p class="gate-sub" id="gate-sub">Grow Groups · тижневі звіти</p>
+    <p class="gate-sub" id="gate-sub">SOL Adult · тижневі звіти</p>
     <input id="pwd" type="password" placeholder="Пароль" autocomplete="off" />
     <button class="gate-btn" id="enter" data-i18n="enter">Увійти</button>
     <div class="gate-error" id="err"></div>
@@ -28,7 +28,7 @@
 
     <header class="header">
       <div class="eyebrow" id="church-name">SOL Church</div>
-      <h1 class="title" id="title">Grow <em>Groups</em></h1>
+      <h1 class="title" id="title">SOL <em>Adult</em></h1>
       <div class="divider"><span class="glyph">❦</span></div>
       <div class="controls">
         <div class="select-wrap">
@@ -38,6 +38,10 @@
         <button class="btn-ghost" id="refresh" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
           <span data-i18n="refresh">Оновити</span>
+        </button>
+        <button class="btn-ghost" id="download-open" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><polyline points="7 11 12 16 17 11"></polyline><path d="M5 21h14"></path></svg>
+          <span data-i18n="download">Завантажити дані</span>
         </button>
       </div>
     </header>
@@ -115,8 +119,31 @@
 
     <footer class="footer">
       <span id="footer-time"><span class="live-dot"></span>Оновлено · —</span>
-      <span><span id="footer-name">SOL Church · Grow Groups</span> · <a id="footer-switch" href="hsm.html">SOL HSM</a></span>
+      <span><span id="footer-name">SOL Adult · Grow Groups</span> · <a id="footer-switch" href="hsm.html">SOL HSM</a></span>
     </footer>
+  </div>
+
+  <div class="modal" id="download-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="download-title">
+      <h2 id="download-title" data-i18n="downloadTitle">Завантажити дані</h2>
+      <p class="modal-sub" id="download-hint">Лише SOL Adult. Звіти — за обрані дати, лідери — поточний список. Рядки SOL HSM сюди не входять.</p>
+      <div class="presets">
+        <button class="preset" type="button" data-preset="7" data-i18n="last7">7 днів</button>
+        <button class="preset" type="button" data-preset="30" data-i18n="last30">30 днів</button>
+        <button class="preset" type="button" data-preset="90" data-i18n="last90">90 днів</button>
+        <button class="preset active" type="button" data-preset="all" data-i18n="allTime">Усі</button>
+      </div>
+      <div class="date-row">
+        <label><span data-i18n="fromLabel">Від</span><input id="export-from" type="date" /></label>
+        <label><span data-i18n="toLabel">До</span><input id="export-to" type="date" /></label>
+      </div>
+      <p class="export-count" id="export-count"></p>
+      <div class="modal-actions">
+        <button class="gate-btn" id="export-csv" type="button" data-i18n="downloadCsv">Завантажити CSV</button>
+        <button class="btn-ghost" id="export-md" type="button" data-i18n="downloadMd">Текст для ШІ</button>
+      </div>
+      <button class="modal-close" id="download-close" type="button" data-i18n="close">Закрити</button>
+    </div>
   </div>
 </div>
 
@@ -124,6 +151,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="config.js"></script>
 <script src="ministry.js"></script>
+<script src="export.js"></script>
 <script src="dashboard.js"></script>
 </body>
 </html>
