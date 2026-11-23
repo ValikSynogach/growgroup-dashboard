@@ -88,7 +88,8 @@ const COPY = {
     downloadCsv: "Download CSV",
     downloadMd: "Markdown for AI",
     close: "Close",
-    downloadHint: "SOL HSM only. Reports use the dates below. Leaders are the current roster. Adult rows are not included.",
+    downloadHintAdult: "SOL Adult only. Reports use the dates below. Leaders are the current roster. HSM rows are not included.",
+    downloadHintHsm: "SOL HSM only. Reports use the dates below. Leaders are the current roster. Adult rows are not included.",
     loadFailed: "Couldn't load the sheet.",
     loadFailedRest: "Refresh the page to try again.",
     emptyYouth: "No reports yet.",
@@ -98,93 +99,18 @@ const COPY = {
     emptyHsmReports: "No SOL HSM reports yet.",
     emptyHsmReportsRest: "Registered leaders are listed below. Check-ins will show up here on the next refresh.",
   },
-  uk: {
-    locale: "uk-UA",
-    gateTitle: "Вітаємо 🙏",
-    enter: "Увійти",
-    passwordPlaceholder: "Пароль",
-    badPassword: "Схоже, пароль не той.",
-    week: "Тиждень",
-    refresh: "Оновити",
-    overview: "Огляд",
-    totalLeaders: "Усього лідерів",
-    registered: "зареєстровано",
-    reported: "Здали звіт",
-    thisWeek: "цього тижня",
-    met: "Зустрілись",
-    groupsGathered: "групи зібрались",
-    avgAttendance: "Середня відвідуваність",
-    perGroup: "людей у групі",
-    attendanceTitle: "Відвідуваність",
-    attendanceSub: "Скільки людей зібралось, по тижнях",
-    thisWeekTitle: "Цей тиждень",
-    metSkipped: "Зустрілись і пропустили",
-    prayersTitle: "Молитовні <em>потреби</em>",
-    awaitingTitle: "Чекаємо на звіти",
-    awaitingSub: "Лідери, які ще не здали звіт цього тижня",
-    leadersTitle: "Лідери <em>та їхні групи</em>",
-    leadersSub: "Натисніть на лідера, щоб побачити учасників та історію.",
-    chartAria: "Відвідуваність по тижнях",
-    donutAria: "Зустрілись і пропустили",
-    updated: "Оновлено",
-    noReportsOption: "Звітів ще немає",
-    noPrayersWeek: "Цього тижня молитовних потреб ще немає.",
-    everyoneReported: "Усі здали звіт цього тижня 🙌",
-    noLeaders: "Лідерів ще немає.",
-    friendGroup: "Friend group",
-    members: "Учасники",
-    rosterEmpty: "Ще не вказано — лідер може надіслати /members у боті.",
-    rosterNotLoaded: "Список учасників не завантажено.<br>Опублікуйте вкладку <b>Leaders</b> як CSV і додайте адресу в <code>CONFIG.LEADERS_CSV_URL</code>.",
-    statistics: "Статистика",
-    totalReports: "Усього звітів",
-    skipped: "Пропустили",
-    lastCheckin: "Останній звіт",
-    lastPrayer: "Остання молитовна потреба",
-    noPrayerYet: "Молитовних потреб ще немає.",
-    people: "Люди",
-    download: "Завантажити дані",
-    downloadTitle: "Завантажити дані",
-    last7: "7 днів",
-    last30: "30 днів",
-    last90: "90 днів",
-    allTime: "Усі",
-    fromLabel: "Від",
-    toLabel: "До",
-    downloadCsv: "Завантажити CSV",
-    downloadMd: "Текст для ШІ",
-    close: "Закрити",
-    downloadHint: "Лише SOL Adult. Звіти — за обрані дати, лідери — поточний список. Рядки SOL HSM сюди не входять.",
-    loadFailed: "Не вдалося завантажити таблицю.",
-    loadFailedRest: "Оновіть сторінку, щоб спробувати ще раз.",
-    emptyYouth: "Звітів ще немає.",
-    emptyYouthRest: "Вони з’являться тут, коли лідери надішлють звіт.",
-    emptyHsmNone: "No SOL HSM data yet.",
-    emptyHsmNoneRest: "This page stays empty until a leader is part of SOL HSM and submits a report.",
-    emptyHsmReports: "No SOL HSM reports yet.",
-    emptyHsmReportsRest: "Registered leaders are listed below. Check-ins will show up here on the next refresh.",
-  },
 };
 
-function lang() {
-  return CONFIG.LANG === "en" ? "en" : "uk";
-}
 function t(key) {
-  const pack = COPY[lang()];
-  return pack[key] != null ? pack[key] : COPY.en[key];
-}
-function ukPlural(n, one, few, many) {
-  const n10 = n % 10;
-  const n100 = n % 100;
-  if (n10 === 1 && n100 !== 11) return one;
-  if (n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14)) return few;
-  return many;
+  return COPY.en[key];
 }
 function reportsWord(n) {
-  return lang() === "en" ? (n === 1 ? "report" : "reports") : ukPlural(n, "звіт", "звіти", "звітів");
+  return n === 1 ? "report" : "reports";
 }
 function leadersWord(n) {
-  return lang() === "en" ? (n === 1 ? "leader" : "leaders") : ukPlural(n, "лідер", "лідери", "лідерів");
+  return n === 1 ? "leader" : "leaders";
 }
+// Placeholder answers stored in the sheet, not interface text.
 const EMPTY_PRAYER = new Set(["none", "no", "n/a", "-", "—", "немає", "нема", "ні", "неа", "нет"]);
 
 const gate = document.getElementById("gate");
@@ -234,7 +160,7 @@ function weekRange(weekKey) {
   start.setUTCDate(jan4.getUTCDate() - (jan4.getUTCDay() || 7) + 1 + (w - 1) * 7);
   const end = new Date(start);
   end.setUTCDate(start.getUTCDate() + 6);
-  const fmt = (d) => d.toLocaleDateString(t("locale"), { month: "short", day: "numeric" });
+  const fmt = (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   return `${fmt(start)} – ${fmt(end)}`;
 }
 function escapeHtml(s) {
@@ -437,13 +363,11 @@ function render() {
   document.getElementById("s-total").textContent = totalLeaders || 0;
   document.getElementById("s-reported").textContent = reported;
   document.getElementById("s-reported-meta").textContent = totalLeaders
-    ? `${Math.round(reported / totalLeaders * 100)}% ${lang() === "en" ? "of leaders" : "лідерів"}`
+    ? `${Math.round(reported / totalLeaders * 100)}% of leaders`
     : t("thisWeek");
   document.getElementById("s-met").textContent = met;
   document.getElementById("s-met-meta").textContent = allRows.length
-    ? (lang() === "en"
-        ? `of ${reported} reported`
-        : (reported === 1 ? "з 1 звіту" : `з ${reported} звітів`))
+    ? `of ${reported} reported`
     : t("groupsGathered");
   document.getElementById("s-avg").textContent = counts.length ? avg.toFixed(1) : "—";
 
@@ -559,15 +483,9 @@ function render() {
     sub.textContent = t("everyoneReported");
     list.innerHTML = "";
   } else {
-    if (lang() === "en") {
-      sub.textContent = missing.length === 1
-        ? "1 leader hasn't submitted this week's check-in"
-        : `${missing.length} leaders haven't submitted this week's check-in`;
-    } else {
-      sub.textContent = missing.length === 1
-        ? "1 лідер ще без звіту цього тижня"
-        : `${missing.length} ${leadersWord(missing.length)} ще не здали звіт цього тижня`;
-    }
+    sub.textContent = missing.length === 1
+      ? "1 leader hasn't submitted this week's check-in"
+      : `${missing.length} leaders haven't submitted this week's check-in`;
     list.innerHTML = missing.map((m) => `
       <li>
         <span class="missing-name">${escapeHtml(m.name)}</span>
@@ -578,7 +496,7 @@ function render() {
 
   const now = new Date();
   document.getElementById("footer-time").innerHTML =
-    '<span class="live-dot"></span>' + escapeHtml(t("updated")) + " · " + now.toLocaleString(t("locale"), { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    '<span class="live-dot"></span>' + escapeHtml(t("updated")) + " · " + now.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
   renderLeaders();
   if (typeof refreshExportCount === "function") refreshExportCount();
@@ -692,7 +610,7 @@ function renderLeaders() {
       <div class="leader-card${isOpen}" data-uid="${escapeHtml(s.uid)}">
         <button class="leader-toggle" onclick="toggleLeader(this)" aria-expanded="${isOpen ? "true" : "false"}">
           <span class="leader-name">${escapeHtml(s.name)}</span>
-          <span class="leader-quick">${total} ${reportsWord(total)} · ${lang() === "en" ? "avg" : "сер."} ${avg}</span>
+          <span class="leader-quick">${total} ${reportsWord(total)} · avg ${avg}</span>
           <span class="leader-chevron">⌄</span>
         </button>
         <div class="leader-details">
@@ -729,28 +647,18 @@ function relativeTime(d) {
   const now = new Date();
   const diff = (now - d) / 1000;
   const n = (unit) => Math.floor(diff / unit);
-  if (lang() === "en") {
-    if (diff < 60) return "just now";
-    if (diff < 3600) return n(60) + " min ago";
-    if (diff < 86400) return n(3600) + " hr ago";
-    if (diff < 86400 * 7) {
-      const days = n(86400);
-      return days + (days === 1 ? " day ago" : " days ago");
-    }
-  } else {
-    if (diff < 60) return "щойно";
-    if (diff < 3600) return n(60) + " хв тому";
-    if (diff < 86400) return n(3600) + " год тому";
-    if (diff < 86400 * 7) {
-      const days = n(86400);
-      return `${days} ${ukPlural(days, "день", "дні", "днів")} тому`;
-    }
+  if (diff < 60) return "just now";
+  if (diff < 3600) return n(60) + " min ago";
+  if (diff < 86400) return n(3600) + " hr ago";
+  if (diff < 86400 * 7) {
+    const days = n(86400);
+    return days + (days === 1 ? " day ago" : " days ago");
   }
-  return d.toLocaleDateString(t("locale"), { month: "short", day: "numeric" });
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 function applyBranding() {
-  document.documentElement.lang = lang() === "en" ? "en" : "uk";
+  document.documentElement.lang = "en";
   document.title = CONFIG.DOCUMENT_TITLE;
   const gateSub = document.getElementById("gate-sub");
   if (gateSub) gateSub.textContent = CONFIG.GATE_SUB;
@@ -778,7 +686,7 @@ function applyBranding() {
   const donut = document.getElementById("donutChart");
   if (donut) donut.setAttribute("aria-label", t("donutAria"));
   const hint = document.getElementById("download-hint");
-  if (hint) hint.textContent = t("downloadHint");
+  if (hint) hint.textContent = CONFIG.MINISTRY === "hsm" ? t("downloadHintHsm") : t("downloadHintAdult");
 }
 
 function isoDay(date) {
@@ -801,7 +709,7 @@ function exportLeaderRows() {
       friend_group: String(Ministry.cell(ld, "friend_group") || "").trim(),
     }))
     .filter((ld) => ld.name || ld.user_id)
-    .sort((a, b) => a.name.localeCompare(b.name, t("locale")));
+    .sort((a, b) => a.name.localeCompare(b.name, "en"));
 }
 
 function exportReportRows(from, to) {
@@ -858,9 +766,7 @@ function setupDownload() {
     const leaders = exportLeaderRows();
     const el = document.getElementById("export-count");
     if (!el) return;
-    el.textContent = lang() === "en"
-      ? `${reports.length} ${reports.length === 1 ? "report" : "reports"} · ${leaders.length} ${leaders.length === 1 ? "leader" : "leaders"}`
-      : `${reports.length} ${reportsWord(reports.length)} · ${leaders.length} ${leadersWord(leaders.length)}`;
+    el.textContent = `${reports.length} ${reportsWord(reports.length)} · ${leaders.length} ${leadersWord(leaders.length)}`;
   };
 
   function applyPreset(name) {

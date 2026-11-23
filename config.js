@@ -8,9 +8,9 @@ var CONFIG = {
   PASSWORD: "growgroup2026",
 
   MINISTRY: "adult",
-  LANG: "uk",
+  LANG: "en",
   DOCUMENT_TITLE: "SOL Adult · Grow Groups",
-  GATE_SUB: "SOL Adult · тижневі звіти",
+  GATE_SUB: "SOL Adult · weekly reports",
   EYEBROW: "SOL Church",
   TITLE_HTML: "SOL <em>Adult</em>",
   DASHBOARD_TITLE: "Grow Groups",

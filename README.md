@@ -7,7 +7,7 @@ Static GitHub Pages dashboards for SOL Church growth groups. Both pages read the
 
 A row is SOL HSM only when its own `ministry` cell is `HSM` or `SOL HSM` (any case; spaces, hyphens, and underscores are ignored). `ADULT`, `SOL ADULT`, a blank cell, a missing column, and any other non-HSM value — including older `YOUTH` cells — stay on the SOL Adult page. A report is not reclassified when that leader's current cell changes.
 
-The adult page is Ukrainian. The HSM page is English. On an HSM leader card, `friend_group` is the friend-group answer; a blank cell falls back to `members`. The adult page shows `members` only.
+Both pages are in English. Sheet values, including names and prayer requests, are shown as stored. On an HSM leader card, `friend_group` is the friend-group answer; a blank cell falls back to `members`. The adult page shows `members` only.
 
 Download data on either page exports only that ministry. CSV is the reports in the chosen dates. The Markdown file is a paste-ready summary of the current leaders (members and friend group) plus those reports.
 

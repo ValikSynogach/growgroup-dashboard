@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="uk">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -15,10 +15,10 @@
 <div class="gate" id="gate">
   <div class="gate-card">
     <div class="gate-mark">✦</div>
-    <h1 class="gate-title" data-i18n="gateTitle">Вітаємо 🙏</h1>
-    <p class="gate-sub" id="gate-sub">SOL Adult · тижневі звіти</p>
-    <input id="pwd" type="password" placeholder="Пароль" autocomplete="off" />
-    <button class="gate-btn" id="enter" data-i18n="enter">Увійти</button>
+    <h1 class="gate-title" data-i18n="gateTitle">Welcome 🙏</h1>
+    <p class="gate-sub" id="gate-sub">SOL Adult · weekly reports</p>
+    <input id="pwd" type="password" placeholder="Enter password" autocomplete="off" lang="en-US" />
+    <button class="gate-btn" id="enter" data-i18n="enter">Enter</button>
     <div class="gate-error" id="err"></div>
   </div>
 </div>
@@ -32,23 +32,23 @@
       <div class="divider"><span class="glyph">❦</span></div>
       <div class="controls">
         <div class="select-wrap">
-          <label for="week" data-i18n="week">Тиждень</label>
+          <label for="week" data-i18n="week">Week</label>
           <select id="week"></select>
         </div>
         <button class="btn-ghost" id="refresh" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-          <span data-i18n="refresh">Оновити</span>
+          <span data-i18n="refresh">Refresh</span>
         </button>
         <button class="btn-ghost" id="download-open" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><polyline points="7 11 12 16 17 11"></polyline><path d="M5 21h14"></path></svg>
-          <span data-i18n="download">Завантажити дані</span>
+          <span data-i18n="download">Download data</span>
         </button>
       </div>
     </header>
 
     <div class="banner" id="banner" style="display:none">
       <span>🌱</span>
-      <div><b>Демо.</b> Показано зразкові дані. Вкажіть <code>CONFIG.SHEET_CSV_URL</code> у config.js, щоб підключити вашу Google-таблицю.</div>
+      <div><b>Demo mode.</b> Showing sample data. Edit <code>CONFIG.SHEET_CSV_URL</code> in config.js to connect your real Google Sheet.</div>
     </div>
 
     <div class="banner" id="empty-state" style="display:none">
@@ -56,39 +56,39 @@
       <div id="empty-state-text"></div>
     </div>
 
-    <p class="section-label" data-i18n="overview">Огляд</p>
+    <p class="section-label" data-i18n="overview">An overview</p>
     <div class="stats" data-pane="stats">
       <div class="stat stat--terracotta">
-        <div class="stat-label" data-i18n="totalLeaders">Усього лідерів</div>
+        <div class="stat-label" data-i18n="totalLeaders">Total leaders</div>
         <div class="stat-value" id="s-total">—</div>
-        <div class="stat-meta" id="s-total-meta" data-i18n="registered">зареєстровано</div>
+        <div class="stat-meta" id="s-total-meta" data-i18n="registered">registered</div>
       </div>
       <div class="stat stat--gold">
-        <div class="stat-label" data-i18n="reported">Здали звіт</div>
+        <div class="stat-label" data-i18n="reported">Reported</div>
         <div class="stat-value" id="s-reported">—</div>
-        <div class="stat-meta" id="s-reported-meta" data-i18n="thisWeek">цього тижня</div>
+        <div class="stat-meta" id="s-reported-meta" data-i18n="thisWeek">this week</div>
       </div>
       <div class="stat stat--sage">
-        <div class="stat-label" data-i18n="met">Зустрілись</div>
+        <div class="stat-label" data-i18n="met">Met</div>
         <div class="stat-value" id="s-met">—</div>
-        <div class="stat-meta" id="s-met-meta" data-i18n="groupsGathered">групи зібрались</div>
+        <div class="stat-meta" id="s-met-meta" data-i18n="groupsGathered">groups gathered</div>
       </div>
       <div class="stat stat--rose">
-        <div class="stat-label" data-i18n="avgAttendance">Середня відвідуваність</div>
+        <div class="stat-label" data-i18n="avgAttendance">Avg attendance</div>
         <div class="stat-value" id="s-avg">—</div>
-        <div class="stat-meta" id="s-avg-meta" data-i18n="perGroup">людей у групі</div>
+        <div class="stat-meta" id="s-avg-meta" data-i18n="perGroup">people per group</div>
       </div>
     </div>
 
     <div class="row" data-pane="row">
       <div class="panel">
-        <h3 data-i18n="attendanceTitle">Відвідуваність</h3>
-        <p class="panel-sub" data-i18n="attendanceSub">Скільки людей зібралось, по тижнях</p>
+        <h3 data-i18n="attendanceTitle">Attendance over time</h3>
+        <p class="panel-sub" data-i18n="attendanceSub">Total people gathered, by week</p>
         <div class="chart-wrap"><canvas id="lineChart" role="img" aria-label="Attendance trend across weeks"></canvas></div>
       </div>
       <div class="panel">
-        <h3 data-i18n="thisWeekTitle">Цей тиждень</h3>
-        <p class="panel-sub" data-i18n="metSkipped">Зустрілись і пропустили</p>
+        <h3 data-i18n="thisWeekTitle">This week</h3>
+        <p class="panel-sub" data-i18n="metSkipped">Met vs. skipped</p>
         <div class="chart-wrap" style="height: 220px"><canvas id="donutChart" role="img" aria-label="Met vs skipped donut chart"></canvas></div>
         <div class="legend" id="donut-legend"></div>
       </div>
@@ -96,53 +96,53 @@
 
     <section class="prayers" data-pane="prayers">
       <div class="prayers-head">
-        <h2 class="prayers-title" data-i18n-html="prayersTitle">Молитовні <em>потреби</em></h2>
+        <h2 class="prayers-title" data-i18n-html="prayersTitle">Prayer <em>requests</em></h2>
         <span style="color:var(--ink-mute); font-size:0.85rem" id="prayers-count">—</span>
       </div>
       <div class="prayers-grid" id="prayers-grid"></div>
     </section>
 
     <section class="missing" data-pane="missing">
-      <h3 data-i18n="awaitingTitle">Чекаємо на звіти</h3>
-      <p class="missing-sub" id="missing-sub" data-i18n="awaitingSub">Лідери, які ще не здали звіт цього тижня</p>
+      <h3 data-i18n="awaitingTitle">Awaiting reports</h3>
+      <p class="missing-sub" id="missing-sub" data-i18n="awaitingSub">Leaders who haven't submitted this week's check-in</p>
       <ul id="missing-list"></ul>
     </section>
 
     <section class="leaders-section" data-pane="leaders">
       <div class="leaders-head">
-        <h2 class="leaders-title" data-i18n-html="leadersTitle">Лідери <em>та їхні групи</em></h2>
+        <h2 class="leaders-title" data-i18n-html="leadersTitle">Leaders <em>& their groups</em></h2>
         <span style="color:var(--ink-mute); font-size:0.85rem" id="leaders-count">—</span>
       </div>
-      <p class="leaders-sub" data-i18n="leadersSub">Натисніть на лідера, щоб побачити учасників та історію.</p>
+      <p class="leaders-sub" data-i18n="leadersSub">Tap a leader to see members and history.</p>
       <div class="leaders-list" id="leaders-list"></div>
     </section>
 
     <footer class="footer">
-      <span id="footer-time"><span class="live-dot"></span>Оновлено · —</span>
+      <span id="footer-time"><span class="live-dot"></span>Last updated · —</span>
       <span><span id="footer-name">SOL Adult · Grow Groups</span> · <a id="footer-switch" href="hsm.html">SOL HSM</a></span>
     </footer>
   </div>
 
   <div class="modal" id="download-modal" hidden>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="download-title">
-      <h2 id="download-title" data-i18n="downloadTitle">Завантажити дані</h2>
-      <p class="modal-sub" id="download-hint">Лише SOL Adult. Звіти — за обрані дати, лідери — поточний список. Рядки SOL HSM сюди не входять.</p>
+      <h2 id="download-title" data-i18n="downloadTitle">Download data</h2>
+      <p class="modal-sub" id="download-hint">SOL Adult only. Reports use the dates below. Leaders are the current roster. HSM rows are not included.</p>
       <div class="presets">
-        <button class="preset" type="button" data-preset="7" data-i18n="last7">7 днів</button>
-        <button class="preset" type="button" data-preset="30" data-i18n="last30">30 днів</button>
-        <button class="preset" type="button" data-preset="90" data-i18n="last90">90 днів</button>
-        <button class="preset active" type="button" data-preset="all" data-i18n="allTime">Усі</button>
+        <button class="preset" type="button" data-preset="7" data-i18n="last7">Last 7 days</button>
+        <button class="preset" type="button" data-preset="30" data-i18n="last30">Last 30 days</button>
+        <button class="preset" type="button" data-preset="90" data-i18n="last90">Last 90 days</button>
+        <button class="preset active" type="button" data-preset="all" data-i18n="allTime">All</button>
       </div>
       <div class="date-row">
-        <label><span data-i18n="fromLabel">Від</span><input id="export-from" type="date" /></label>
-        <label><span data-i18n="toLabel">До</span><input id="export-to" type="date" /></label>
+        <label><span data-i18n="fromLabel">From</span><input id="export-from" type="date" lang="en-US" /></label>
+        <label><span data-i18n="toLabel">To</span><input id="export-to" type="date" lang="en-US" /></label>
       </div>
       <p class="export-count" id="export-count"></p>
       <div class="modal-actions">
-        <button class="gate-btn" id="export-csv" type="button" data-i18n="downloadCsv">Завантажити CSV</button>
-        <button class="btn-ghost" id="export-md" type="button" data-i18n="downloadMd">Текст для ШІ</button>
+        <button class="gate-btn" id="export-csv" type="button" data-i18n="downloadCsv">Download CSV</button>
+        <button class="btn-ghost" id="export-md" type="button" data-i18n="downloadMd">Markdown for AI</button>
       </div>
-      <button class="modal-close" id="download-close" type="button" data-i18n="close">Закрити</button>
+      <button class="modal-close" id="download-close" type="button" data-i18n="close">Close</button>
     </div>
   </div>
 </div>
