@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SOL HSM · Grow Groups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- Same dashboard as index.html, filtered to SOL HSM rows. Branding overrides follow config.js. -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-mark">✦</div>
+    <h1 class="gate-title" data-i18n="gateTitle">Welcome 🙏</h1>
+    <p class="gate-sub" id="gate-sub">SOL HSM · weekly reports</p>
+    <input id="pwd" type="password" placeholder="Enter password" autocomplete="off" />
+    <button class="gate-btn" id="enter" data-i18n="enter">Enter</button>
+    <div class="gate-error" id="err"></div>
+  </div>
+</div>
+
+<div class="app locked" id="app">
+  <div class="shell">
+
+    <header class="header">
+      <div class="eyebrow" id="church-name">SOL Church</div>
+      <h1 class="title" id="title">SOL <em>HSM</em></h1>
+      <div class="divider"><span class="glyph">❦</span></div>
+      <div class="controls">
+        <div class="select-wrap">
+          <label for="week" data-i18n="week">Week</label>
+          <select id="week"></select>
+        </div>
+        <button class="btn-ghost" id="refresh" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          <span data-i18n="refresh">Refresh</span>
+        </button>
+        <button class="btn-ghost" id="download-open" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><polyline points="7 11 12 16 17 11"></polyline><path d="M5 21h14"></path></svg>
+          <span data-i18n="download">Download data</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="banner" id="banner" style="display:none">
+      <span>🌱</span>
+      <div><b>Demo mode.</b> Showing sample data. Edit <code>CONFIG.SHEET_CSV_URL</code> in config.js to connect your real Google Sheet.</div>
+    </div>
+
+    <div class="banner" id="empty-state" style="display:none">
+      <span>🌱</span>
+      <div id="empty-state-text"></div>
+    </div>
+
+    <p class="section-label" data-i18n="overview">An overview</p>
+    <div class="stats" data-pane="stats">
+      <div class="stat stat--terracotta">
+        <div class="stat-label" data-i18n="totalLeaders">Total leaders</div>
+        <div class="stat-value" id="s-total">—</div>
+        <div class="stat-meta" id="s-total-meta" data-i18n="registered">registered</div>
+      </div>
+      <div class="stat stat--gold">
+        <div class="stat-label" data-i18n="reported">Reported</div>
+        <div class="stat-value" id="s-reported">—</div>
+        <div class="stat-meta" id="s-reported-meta" data-i18n="thisWeek">this week</div>
+      </div>
+      <div class="stat stat--sage">
+        <div class="stat-label" data-i18n="met">Met</div>
+        <div class="stat-value" id="s-met">—</div>
+        <div class="stat-meta" id="s-met-meta" data-i18n="groupsGathered">groups gathered</div>
+      </div>
+      <div class="stat stat--rose">
+        <div class="stat-label" data-i18n="avgAttendance">Avg attendance</div>
+        <div class="stat-value" id="s-avg">—</div>
+        <div class="stat-meta" id="s-avg-meta" data-i18n="perGroup">people per group</div>
+      </div>
+    </div>
+
+    <div class="row" data-pane="row">
+      <div class="panel">
+        <h3 data-i18n="attendanceTitle">Attendance over time</h3>
+        <p class="panel-sub" data-i18n="attendanceSub">Total people gathered, by week</p>
+        <div class="chart-wrap"><canvas id="lineChart" role="img" aria-label="Attendance trend across weeks"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3 data-i18n="thisWeekTitle">This week</h3>
+        <p class="panel-sub" data-i18n="metSkipped">Met vs. skipped</p>
+        <div class="chart-wrap" style="height: 220px"><canvas id="donutChart" role="img" aria-label="Met vs skipped donut chart"></canvas></div>
+        <div class="legend" id="donut-legend"></div>
+      </div>
+    </div>
+
+    <section class="prayers" data-pane="prayers">
+      <div class="prayers-head">
+        <h2 class="prayers-title" data-i18n-html="prayersTitle">Prayer <em>requests</em></h2>
+        <span style="color:var(--ink-mute); font-size:0.85rem" id="prayers-count">—</span>
+      </div>
+      <div class="prayers-grid" id="prayers-grid"></div>
+    </section>
+
+    <section class="missing" data-pane="missing">
+      <h3 data-i18n="awaitingTitle">Awaiting reports</h3>
+      <p class="missing-sub" id="missing-sub" data-i18n="awaitingSub">Leaders who haven't submitted this week's check-in</p>
+      <ul id="missing-list"></ul>
+    </section>
+
+    <section class="leaders-section" data-pane="leaders">
+      <div class="leaders-head">
+        <h2 class="leaders-title" data-i18n-html="leadersTitle">Leaders <em>& their groups</em></h2>
+        <span style="color:var(--ink-mute); font-size:0.85rem" id="leaders-count">—</span>
+      </div>
+      <p class="leaders-sub" data-i18n="leadersSub">Tap a leader to see members and history.</p>
+      <div class="leaders-list" id="leaders-list"></div>
+    </section>
+
+    <footer class="footer">
+      <span id="footer-time"><span class="live-dot"></span>Last updated · —</span>
+      <span><span id="footer-name">SOL HSM · Grow Groups</span> · <a id="footer-switch" href="index.html">SOL Adult</a></span>
+    </footer>
+  </div>
+
+  <div class="modal" id="download-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="download-title">
+      <h2 id="download-title" data-i18n="downloadTitle">Download data</h2>
+      <p class="modal-sub" id="download-hint">SOL HSM only. Reports use the dates below. Leaders are the current roster. Adult rows are not included.</p>
+      <div class="presets">
+        <button class="preset" type="button" data-preset="7" data-i18n="last7">Last 7 days</button>
+        <button class="preset" type="button" data-preset="30" data-i18n="last30">Last 30 days</button>
+        <button class="preset" type="button" data-preset="90" data-i18n="last90">Last 90 days</button>
+        <button class="preset active" type="button" data-preset="all" data-i18n="allTime">All</button>
+      </div>
+      <div class="date-row">
+        <label><span data-i18n="fromLabel">From</span><input id="export-from" type="date" lang="en-US" /></label>
+        <label><span data-i18n="toLabel">To</span><input id="export-to" type="date" lang="en-US" /></label>
+      </div>
+      <p class="export-count" id="export-count"></p>
+      <div class="modal-actions">
+        <button class="gate-btn" id="export-csv" type="button" data-i18n="downloadCsv">Download CSV</button>
+        <button class="btn-ghost" id="export-md" type="button" data-i18n="downloadMd">Markdown for AI</button>
+      </div>
+      <button class="modal-close" id="download-close" type="button" data-i18n="close">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="config.js"></script>
+<script>
+  Object.assign(CONFIG, {
+    MINISTRY: "hsm",
+    LANG: "en",
+    DOCUMENT_TITLE: "SOL HSM · Grow Groups",
+    GATE_SUB: "SOL HSM · weekly reports",
+    EYEBROW: "SOL Church",
+    TITLE_HTML: "SOL <em>HSM</em>",
+    FOOTER_NAME: "SOL HSM · Grow Groups",
+    OTHER_HREF: "index.html",
+    OTHER_LABEL: "SOL Adult",
+  });
+</script>
+<script src="ministry.js"></script>
+<script src="export.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>
